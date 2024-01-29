@@ -1,0 +1,79 @@
+<html>
+
+<head>
+
+	<!-- This adapter normalizes cross-browser differences in WebRTC APIs. Currently necessary in order to support Firefox. -->
+
+	<script src="adapter.min.js"
+		integrity="sha512-l40eBFtXx+ve5RryIELC3y6/OM6Nu89mLGQd7fg1C93tN6XrkC3supb+/YiD/Y+B8P37kdJjtG1MT1kOO2VzxA=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+
+	<!-- This div is used for local video feed -->
+	<!-- WebRTC-HTTP Ingestion protocol (WHIP)
+WebRTC producer → HTTP Endpoint → Media Server
+to ingest (push) a stream to media server
+SendOnly -->
+
+
+	<!-- POST /endpoint/
+Request Body : SDP Offer
+Response Body : SDP Answer
+Response Headers :
+Location: Resource URL
+Link: STUN/TURN servers -->
+
+<!-- Create a live input using the Stream API
+curl -X POST \
+-H "Authorization: Bearer <API_TOKEN>" \
+https://api.cloudflare.com/client/v4/accounts/<ACCOUNT_ID>/stream/live_inputs -->
+
+	<div>
+		<h4>Broadcasting video using WHIP</h4>
+		<h5>(local video feed)</h5>
+		<video id="input-video" autoplay muted></video>
+
+		<script type="module">
+			import WHIPClient from './WHIPClient.js';
+			const url_whip = "https://customer-px4ru5rucxtgoo68.cloudflarestream.com/b6b5bc7ca9532fb75876b6bc23b36148k01f4aefe1fe23d3a314b8289b472dafe/webRTC/publish";
+			const videoElement = document.getElementById('input-video');
+			self.whipClient = new WHIPClient(url_whip, videoElement);
+		</script>
+
+	</div>
+
+
+	<!-- This div is used for remote video feed -->
+	<!-- WebRTC-HTTP Egress Protocol (WHEP)
+	WebRTC consumer → HTTP Endpoint → Media Server
+	to consume a stream from a media server
+	RecvOnly -->
+
+	<!-- POST /endpoint
+Request Body : SDP Offer
+Response Body : SDP Answer
+Response Headers :
+Location: Resource URL
+Link: STUN/TURN servers -->
+
+	<div>
+
+		<h4>Playing video using WHEP</h4>
+		<h5>(remote content)</h5>
+		<video id="remote-video" controls autoplay muted></video>
+		<script type="module">
+			import WHEPClient from './WHEPClient.js';
+			const url_whep = "https://customer-px4ru5rucxtgoo68.cloudflarestream.com/01f4aefe1fe23d3a314b8289b472dafe/webRTC/play";
+			const videoElement2 = document.getElementById('remote-video');
+			self.whepClient = new WHEPClient(url_whep, videoElement2);
+		</script>
+
+	</div>
+
+</body>
+
+</html>
